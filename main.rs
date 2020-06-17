@@ -1,4 +1,6 @@
 use std::borrow::Cow;
+use chrono::{DateTime, Local};
+
 fn myfunc<'a, S: Into<Cow<'a, str>>>(val: S,mac: S, offset: u8, count: u8) -> String{
     let starPos = 0;
     let mut s2: String = String::from("");
@@ -72,8 +74,7 @@ fn kic_indexOf(val : &String, text : String) -> i8{
     println!("res= {}",res);
     res
 }
-fn main() {
-
+fn test_getLenght(){
     let val : String = String::from("\"aaaa\"bbbb\"");
     let text : String = String::from("a");
     let matches : String = String::from("\"");
@@ -87,4 +88,19 @@ fn main() {
     let val2 : String = String::from("\"aaaa\"bbbb\"");
     let matches2 : String = String::from("babb");
     let mut starPos : i8 = kic_indexOf(&val2,matches2);
+}
+//unxTime
+fn kic_unixTime() -> i64 
+{
+    let dt : DateTime<Local> = Local::now();
+    //現在のローカル時間
+    let text = dt.format("%Y年%m月%d日 %H時%M分%S秒 %Z").to_string();
+    println!("{}", text);
+    let timestamp : i64 = dt.timestamp_millis();
+    println!("{}",timestamp);
+    timestamp
+}
+fn main() {
+
+    kic_unixTime();
 }
