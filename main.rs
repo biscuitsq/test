@@ -1,6 +1,7 @@
 use std::borrow::Cow;
-use chrono::{DateTime, Local};
-
+use chrono::{DateTime, Local};//unixtime
+use std::time::{Instant};//stopwatch
+use std::thread;//thread
 fn myfunc<'a, S: Into<Cow<'a, str>>>(val: S,mac: S, offset: u8, count: u8) -> String{
     let starPos = 0;
     let mut s2: String = String::from("");
@@ -100,7 +101,54 @@ fn kic_unixTime() -> i64
     println!("{}",timestamp);
     timestamp
 }
+//例外処理1
+fn Exception1(){
+    let a : Result<i32,_>= "4693".parse();
+    let b : Result<i32,_>= "hao123".parse();
+    match a{
+        Ok(x)=> println!("{}",x),
+        Err(_)=> println!("変換に失敗")
+    };
+    match b{
+        Ok(x) => println!("{}",x),
+        Err(_) => println!("変換に失敗")
+    };
+}
+//stopwatch//millis
+fn stopwatch() -> u32{
+    let start = Instant::now();
+    for elem in 0..100000 {
+        
+    }
+    let end = start.elapsed();
+    let delay_millis = end.subsec_millis();
+    let delay_nanos = end.subsec_nanos();
+    println!("{}", delay_millis);
+    delay_millis
+}
+//thread_test
+fn do_thread(x: i32) -> i32{
+    let time = x as u32;
+    thread::sleep_ms(time);
+    x * 2
+}
+fn thread_test1(){
+    let delay : i32 = 1000;
+    thread::spawn(move || {
+        let result = do_thread(delay);
+        println!("{:?}",result);
+    });
+    thread::sleep_ms(500);
+}
+fn thread_test2(){
+    let delay : i32 = 10;
+    thread::spawn(move || {
+        let result = do_thread(delay);
+        println!("{:?}",result);
+    });
+    thread::sleep_ms(500);
+}
 fn main() {
-
-    kic_unixTime();
+    thread_test1();
+    thread_test2();
 }
