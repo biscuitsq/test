@@ -1,6 +1,8 @@
 use std::borrow::Cow;
 use chrono::Weekday;
 use chrono::{DateTime, Local};//unixtime
+use chrono::prelude::*;
+use std::time::Duration;
 use std::time::{Instant};//stopwatch
 use std::thread;//thread
 use websocket::sync::Server;//ws_server
@@ -117,6 +119,12 @@ fn format_japan_weekday(weekday: &Weekday) -> &str {
         Weekday::Sun => "日",
     }
 }
+fn dayofweek() -> String{
+    let local: DateTime<Local> = Local::now(); // e.g. `2014-11-28T21:45:59.324310806+09:00`
+    let val = local.weekday();
+    let dayofweek = format_japan_weekday(&val);
+    dayofweek.to_string()
+}
 //例外処理1
 fn Exception1(){
     let a : Result<i32,_>= "4693".parse();
@@ -186,6 +194,8 @@ fn ws_server(){
 fn main() {
     thread_test1();
     thread_test2();
+    let dayofweek = dayofweek();
+    println!("{}",dayofweek);
 }
 
 
