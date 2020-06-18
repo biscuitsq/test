@@ -187,3 +187,10 @@ fn main() {
     thread_test1();
     thread_test2();
 }
+
+
+//cargo.toml
+//[dependencies]
+//websocket = "0.23"
+//rand = "0.7"
+//chrono = { version = "0.4", features = ["serde"] }
