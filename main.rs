@@ -1,7 +1,11 @@
 use std::borrow::Cow;
+use chrono::Weekday;
 use chrono::{DateTime, Local};//unixtime
 use std::time::{Instant};//stopwatch
 use std::thread;//thread
+use websocket::sync::Server;//ws_server
+use websocket::{Message, OwnedMessage};//ws_server
+
 fn myfunc<'a, S: Into<Cow<'a, str>>>(val: S,mac: S, offset: u8, count: u8) -> String{
     let starPos = 0;
     let mut s2: String = String::from("");
@@ -101,6 +105,18 @@ fn kic_unixTime() -> i64
     println!("{}",timestamp);
     timestamp
 }
+//曜日確認
+fn format_japan_weekday(weekday: &Weekday) -> &str {
+    match weekday {
+        Weekday::Mon => "月",
+        Weekday::Tue => "火",
+        Weekday::Wed => "水",
+        Weekday::Thu => "木",
+        Weekday::Fri => "金",
+        Weekday::Sat => "土",
+        Weekday::Sun => "日",
+    }
+}
 //例外処理1
 fn Exception1(){
     let a : Result<i32,_>= "4693".parse();
@@ -147,6 +163,25 @@ fn thread_test2(){
         println!("{:?}",result);
     });
     thread::sleep_ms(500);
+}
+fn ws_server(){
+    let server = Server::bind("localhost:2001").unwrap();
+
+    for request in server.filter_map(Result::ok) {
+        thread::spawn(|| {
+            let mut client = request.accept().unwrap();
+
+            let ip = client.peer_addr().unwrap();
+
+            println!("Connection from {}", ip);
+
+            for _ in 0..1000 {
+                let message = OwnedMessage::Text("Hello".to_string());
+                client.send_message(&message).unwrap();
+                std::thread::sleep(std::time::Duration::from_millis(50)); // 少し待つ
+            }
+        });
+    }
 }
 fn main() {
     thread_test1();
