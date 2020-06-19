@@ -1,12 +1,13 @@
 use std::borrow::Cow;
-use chrono::Weekday;
+use chrono::Weekday;//dayofweek
 use chrono::{DateTime, Local};//unixtime
-use chrono::prelude::*;
-use std::time::Duration;
+use chrono::prelude::*;//dayofweek
+use std::time::Duration;//dayofweek
 use std::time::{Instant};//stopwatch
 use std::thread;//thread
 use websocket::sync::Server;//ws_server
 use websocket::{Message, OwnedMessage};//ws_server
+use device_query::{DeviceQuery, DeviceState, MouseState, Keycode};
 
 fn myfunc<'a, S: Into<Cow<'a, str>>>(val: S,mac: S, offset: u8, count: u8) -> String{
     let starPos = 0;
@@ -191,11 +192,93 @@ fn ws_server(){
         });
     }
 }
+//global variable
+static mut LocalFlag : bool = false;
+//do_thread_local
+fn do_thread_local(){
+    println!("loop:LocalFlag開始します。");
+    loop{
+        unsafe{
+            if LocalFlag == false{
+                break;
+            }
+            println!("処理しています...");
+        }
+        thread::sleep_ms(3000);
+    }
+    println!("loop:LocalFlag終了しました。");
+}
+//thread_local
+fn thread_local(){
+    thread::spawn(move || {
+        thread::sleep_ms(2000);
+        do_thread_local();
+    });
+}
+//do_thread_keyboard
+fn do_thread_keyboard(){
+    println!("loop:keyboard_event開始します。");
+    let device_state = DeviceState::new();
+    let mut end : i32= 0;
+    loop{
+        unsafe{
+            if LocalFlag == false{
+                break;
+            }
+        }
+        let keys: Vec<Keycode> = device_state.get_keys();
+        for key in keys.iter() {
+            if keys.contains(&Keycode::E) && end == 0{
+                println!("Pressed key: {:?}", key);
+                end += 1;
+            }
+            else if keys.contains(&Keycode::N) && end == 1{
+                println!("Pressed key: {:?}", key);
+                end += 1;
+            }
+            else if keys.contains(&Keycode::D) && end == 2{
+                println!("Pressed key: {:?}", key);
+                end += 1;
+                unsafe{
+                    LocalFlag = false;
+                }
+            }
+            else 
+            {
+                end = 0;
+            }
+            break;
+        }
+        thread::sleep_ms(100);
+    }
+    println!("loop:keyboard_event終了しました。");
+}
+//keyborad_event_thread
+fn thread_keyboard(){
+    thread::spawn(move || {
+        do_thread_keyboard();
+    });
+}
 fn main() {
-    thread_test1();
-    thread_test2();
-    let dayofweek = dayofweek();
-    println!("{}",dayofweek);
+    println!("開始しました。");
+    unsafe{
+        LocalFlag = true;
+    }
+    thread_local();
+    println!("キーイベント。");
+    thread_keyboard();
+
+    loop{
+        unsafe{
+            if LocalFlag == false{
+                break;
+            }
+        }
+        thread::sleep_ms(1000);
+    }
+    println!("終了しました。");
+
+    thread::sleep_ms(10000);
 }
 
 
@@ -204,3 +287,4 @@ fn main() {
 //websocket = "0.23"
 //rand = "0.7"
 //chrono = { version = "0.4", features = ["serde"] }
+//device_query = "0.1.0"
