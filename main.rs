@@ -7,7 +7,11 @@ use std::time::{Instant};//stopwatch
 use std::thread;//thread
 use websocket::sync::Server;//ws_server
 use websocket::{Message, OwnedMessage};//ws_server
-use device_query::{DeviceQuery, DeviceState, MouseState, Keycode};
+use device_query::{DeviceQuery, DeviceState, MouseState, Keycode};//keyboardAction
+use reqwest::Client;//webrequest
+use std::collections::HashMap;//webreqwest
+use std::fs;
+use std::io::{Write, Read, BufWriter, BufReader, copy};
 
 fn myfunc<'a, S: Into<Cow<'a, str>>>(val: S,mac: S, offset: u8, count: u8) -> String{
     let starPos = 0;
@@ -259,7 +263,8 @@ fn thread_keyboard(){
         do_thread_keyboard();
     });
 }
-fn main() {
+//testMainThread
+fn test_MainThread(){
     println!("開始しました。");
     unsafe{
         LocalFlag = true;
@@ -276,9 +281,59 @@ fn main() {
         }
         thread::sleep_ms(1000);
     }
-    println!("終了しました。");
 
-    thread::sleep_ms(10000);
+    println!("終了しました。");
+    thread::sleep_ms(10000)
+}
+//httpwebrequest
+type Error = Box<dyn std::error::Error>;
+type Result<T,E = Error> = std::result::Result<T,E>;
+async fn post_greeting() -> Result<()>{
+    let client = Client::new();
+    let req = client
+        // or use .post, etc.
+        .get("https://www.yahoo.co.jp/")
+        .header("Accepts", "application/json");
+        //.query(&[("hello", "1"), ("world", "ABCD")]);
+
+    let res = req.send().await?;
+    println!("{}", res.status());
+
+    let body = res.bytes().await?;
+
+    let v = body.to_vec();
+    let s = String::from_utf8_lossy(&v);
+    println!("response: {} ", s);
+
+    Ok(())
+}
+async fn https_test()
+{
+    post_greeting();
+}
+fn https_test_blocking() -> Result<(), Box<dyn std::error::Error>> {
+    let resp = reqwest::blocking::get("https://www.yahoo.co.jp/")?
+        .json::<HashMap<String, String>>()?;
+    println!("{:#?}", resp);
+    Ok(())
+}
+//file_io
+fn writefile(){
+    let string = "Hello";
+    let mut f = fs::File::create("test.txt").unwrap();
+    f.write_all(string.as_bytes()).unwrap();
+}
+fn readfile(){
+    let mut f = fs::File::open("test.txt").unwrap();
+    let mut buf = vec![];
+    f.read_to_end(&mut buf).unwrap(); 
+    println!("{}", std::str::from_utf8(&buf).unwrap()); 
+}
+fn main() {
+    writefile();
+    readfile();
+    
+
 }
 
 
